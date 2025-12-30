@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AssignRoleRequest extends FormRequest
+class SyncPermissionsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,16 +22,17 @@ class AssignRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'role' => 'required|nullable|exists:roles,name',
+            'permissions' => 'required|array',
+            'permissions.*' => 'exists:permissions,name'
         ];
     }
 
     public function messages(): array
     {
         return [
-            'role.required' => 'El campo del Nombre es obligatorio.',
-            'role.nullable' => 'El campo del Rol no puede ser nulo.',
-            'role.exists' => 'El campo del Rol debe existir.',
+            'permissions.required' => 'El campo del Permiso es obligatorio.',
+            'permissions.array' => 'El campo del Permiso debe ser un array.',
+            'permissions.*.exists' => 'El Permiso debe existir.',
         ];
     }
 }

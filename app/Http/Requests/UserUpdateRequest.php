@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreUserRequest extends FormRequest
+class UserUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,9 +23,9 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email|max:50',
-            'password' => 'required|min:6',
-            'role' => 'required|exists:roles,name'
+            'email' => 'required|email|max:50',
+            'password' => 'nullable|string|min:6',
+            'role' => 'required|exists:roles,name',
         ];
     }
 
@@ -33,13 +33,12 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name.required' => 'El campo del Nombre es obligatorio.',
-            'name.string' => 'El campo del Nombre debe ser una cadena de texto.',
+            'name.string' => 'El campo del Nombre debe tener el formato correcto.',
             'name.max' => 'El campo del Nombre no debe tener más de 100 caracteres.',
             'email.required' => 'El campo del Correo es obligatorio.',
             'email.email' => 'El campo del Correo debe tener el formato correcto.',
-            'email.unique' => 'El campo del Correo debe ser único.',
             'email.max' => 'El campo del Correo no debe tener más de 50 caracteres.',
-            'password.required' => 'El campo de la Contraseña es obligatorio.',
+            'password.string' => 'El campo de la Contraseña debe tener el formato correcto.',
             'password.min' => 'El campo de la Contraseña debe tener mínimo de 6 caracteres.',
             'role.required' => 'El campo del Nombre es obligatorio.',
             'role.exists' => 'El campo del Rol debe existir.',

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\AssignRoleRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 
 
@@ -16,6 +16,13 @@ class UserRoleController extends Controller
     {
         return response()->json([
             User::with(['roles'])->get()
+        ]);
+    }
+
+    public function show(User $user)
+    {
+        return response()->json([
+            $user->load('roles')
         ]);
     }
 
@@ -33,18 +40,58 @@ class UserRoleController extends Controller
         ], 201);
     }
 
-    public function assignRole(AssignRoleRequest $request, $id)
+    public function update(UserUpdateRequest $request, User $user)
     {   
-        $rol = $request->validated();
         
-        $user = User::findOrFail($id);
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
+
+        $user->save();
 
         $user->syncRoles([$request->role]);
 
         return response()->json([
-            'message' => 'Rol asignado correctamente',
-            'user' => $user->load('roles'),
-        ]);
+            'message' => 'Usuario actualizado correctamente',
+            'user' => $user->load('roles')
+        ], 200);
+
     }
+
+    public function activate(User $user)
+    {
+        $user->active = true;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Usuario activado',
+        ], 200);
+    }
+
+    public function deactivate(User $user)
+    {
+        $user->active = false;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Usuario desactivado',
+        ], 200);
+    }
+
+    public function destroy(User $user){
+    
+    $user->syncRoles([]);
+    $user->syncPermissions([]);
+
+    $user->delete();
+
+    return response()->json([
+        'message' => 'Usuario eliminado correctamente',
+        'user' => $user
+    ]);
+}
 
 }
