@@ -6,39 +6,40 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\ApiResponse;
 
 
 class AuthController extends Controller
 {
+    
+    use ApiResponse;
+    
     public function login(LoginRequest $request)
     {
-        if (!Auth::attempt($request->validated())) {
-            return response()->json([
-                'message' => 'Credenciales incorrectas'
+        
+         if (!Auth::attempt($request->validated())) {
+            return $this->errorResponse('Credenciales inválidas.', [
+                'email' => ['Email incorrecto.'],
+                'password' => ['Contraseña incorrecta.']
             ], 401);
         }
 
-        $user = Auth::user();
+        $user  = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'roles' => $user->getRoleNames(),
-                'permissions' => $user->getAllPermissions()->pluck('name')
+        return $this->successResponse(
+            'Inicio de sesión exitoso.',
+            [
+                'token' => $token,
+                'user'  => $user->load('roles')
             ]
-        ]);
+        );
     }
 
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
 
-        return response()->json([
-            'message' => 'Sesión cerrada'
-        ]);
+        return $this->successResponse('Sesión cerrada correctamente.');
     }
 }

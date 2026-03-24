@@ -7,23 +7,35 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
+use App\Traits\ApiResponse;
 
 
 class UserRoleController extends Controller
 {
-    // Listar usuarios con roles y permisos
+    use ApiResponse;
+    
     public function index()
     {
-        return response()->json([
-            User::with(['roles'])->get()
-        ]);
+        $users = User::with('roles')->paginate(10);
+
+        return $this->successResponse(
+            'Usuarios obtenidos correctamente.',
+            $users->items(),
+            200,
+            [
+                'pagination' => [
+                    'total'       => $users->total(),
+                    'perPage'     => $users->perPage(),
+                    'currentPage' => $users->currentPage(),
+                    'lastPage'    => $users->lastPage(),
+                ]
+            ]
+        );
     }
 
     public function show(User $user)
     {
-        return response()->json([
-            $user->load('roles')
-        ]);
+        return $this->successResponse('Usuario encontrado.', $user->load('roles'));
     }
 
     public function store(StoreUserRequest $request)
@@ -34,10 +46,8 @@ class UserRoleController extends Controller
             $user->assignRole($request->role);
         }
 
-        return response()->json([
-            'message' => 'Usuario creado con éxito',
-            'user' => $user->load('roles'),
-        ], 201);
+        return $this->successResponse('Usuario creado correctamente.', $user->load('roles'), 201);
+
     }
 
     public function update(UserUpdateRequest $request, User $user)
@@ -54,10 +64,7 @@ class UserRoleController extends Controller
 
         $user->syncRoles([$request->role]);
 
-        return response()->json([
-            'message' => 'Usuario actualizado correctamente',
-            'user' => $user->load('roles')
-        ], 200);
+        return $this->successResponse('Usuario actualizado correctamente.', $user->load('roles'));
 
     }
 
@@ -66,9 +73,8 @@ class UserRoleController extends Controller
         $user->active = true;
         $user->save();
 
-        return response()->json([
-            'message' => 'Usuario activado',
-        ], 200);
+        return $this->successResponse('Usuario activado.', ['id' => $user->id, 'active' => true]);
+
     }
 
     public function deactivate(User $user)
@@ -76,22 +82,19 @@ class UserRoleController extends Controller
         $user->active = false;
         $user->save();
 
-        return response()->json([
-            'message' => 'Usuario desactivado',
-        ], 200);
+        return $this->successResponse('Usuario desactivado.', ['id' => $user->id, 'active' => false]);
+
     }
 
     public function destroy(User $user){
     
-    $user->syncRoles([]);
-    $user->syncPermissions([]);
+        $user->syncRoles([]);
+        $user->syncPermissions([]);
 
-    $user->delete();
+        $user->delete();
 
-    return response()->json([
-        'message' => 'Usuario eliminado correctamente',
-        'user' => $user
-    ]);
-}
+        return $this->successResponse('Usuario eliminado correctamente.', ['user' => $user]);
+
+    }
 
 }
