@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ApiResponse;
+use App\Http\Resources\UserResource;
 
 
 class AuthController extends Controller
@@ -31,7 +32,7 @@ class AuthController extends Controller
             'Inicio de sesión exitoso.',
             [
                 'token' => $token,
-                'user'  => $user->load('roles')
+                'user'  => new UserResource($user->load('roles'))
             ]
         );
     }
