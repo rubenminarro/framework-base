@@ -9,13 +9,23 @@ use App\Http\Requests\UpdateRoleRequest;
 use App\Http\Requests\SyncPermissionsRequest;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use App\Traits\ApiResponse;
 
 class RoleController extends Controller
+
 {
+    
+    use ApiResponse;
+
     public function index()
     {
         $roles = Role::with('permissions')->get();
-        return response()->json($roles);
+
+        return $this->successResponse(
+            'Roles obtenidos correctamente.',
+            $roles,
+            200
+        );
     }
 
     public function store(StoreRoleRequest $request)

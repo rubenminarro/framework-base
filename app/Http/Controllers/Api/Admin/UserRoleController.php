@@ -8,15 +8,29 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use App\Traits\ApiResponse;
+use App\Http\Resources\ShowUserResource;
 
 
 class UserRoleController extends Controller
 {
     use ApiResponse;
     
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->paginate(10);
+        
+        $search = $request->query('search');
+
+        $users = User::with('roles')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ;
+                });
+            })
+            ->paginate(10);
 
         return $this->successResponse(
             'Usuarios obtenidos correctamente.',
@@ -35,65 +49,57 @@ class UserRoleController extends Controller
 
     public function show(User $user)
     {
-        return $this->successResponse('Usuario encontrado.', $user->load('roles'));
+        return $this->successResponse('Usuario encontrado.', new ShowUserResource($user->load('roles')));
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request, User $user)
     {
-        $user = User::create($request->validated());
+        $data = $request->validated();
+        $data['password'] = bcrypt($request->password);
 
-        if ($request->role) {
-            $user->assignRole($request->role);
-        }
+        $user = User::create($data);
 
-        return $this->successResponse('Usuario creado correctamente.', $user->load('roles'), 201);
-
+        $user->assignRole($request->role);
+    
+        return $this->successResponse('Usuario creado correctamente.', new ShowUserResource($user->load('roles')));
+        
     }
 
     public function update(UserUpdateRequest $request, User $user)
     {   
         
-        $user->name = $request->name;
-        $user->email = $request->email;
+        $data = $request->validated();
 
         if ($request->filled('password')) {
-            $user->password = bcrypt($request->password);
+            $data['password'] = bcrypt($request->password);
+        } else {
+            unset($data['password']);
         }
 
-        $user->save();
+        $user->update($data);
 
         $user->syncRoles([$request->role]);
 
-        return $this->successResponse('Usuario actualizado correctamente.', $user->load('roles'));
+        return $this->successResponse(
+            'Usuario actualizado correctamente.', 
+            new ShowUserResource($user->load('roles'))
+        );
 
     }
 
     public function activate(User $user)
     {
-        $user->active = true;
+        $user->active = !$user->active;
         $user->save();
 
-        return $this->successResponse('Usuario activado.', ['id' => $user->id, 'active' => true]);
-
-    }
-
-    public function deactivate(User $user)
-    {
-        $user->active = false;
-        $user->save();
-
-        return $this->successResponse('Usuario desactivado.', ['id' => $user->id, 'active' => false]);
-
-    }
-
-    public function destroy(User $user){
-    
-        $user->syncRoles([]);
-        $user->syncPermissions([]);
-
-        $user->delete();
-
-        return $this->successResponse('Usuario eliminado correctamente.', ['user' => $user]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Estado del usuario actualizado.',
+            'data' => [
+                'id' => $user->id,
+                'active' => $user->active,
+            ]
+        ]);
 
     }
 

@@ -8,11 +8,10 @@ use App\Http\Controllers\Api\Admin\RoleController;
 Route::middleware(['auth:sanctum', 'role:Administrador'])->prefix('admin')->group(function () {
     
     Route::get('/users', [UserRoleController::class, 'index']);
-    Route::post('/users', [UserRoleController::class, 'store']);
-    Route::get('/users/{user}', [UserRoleController::class, 'show']);
-    Route::put('/users/{user}', [UserRoleController::class, 'update']);
-    Route::post('/users/{user}/activate', [UserRoleController::class, 'activate']);
-    Route::post('/users/{user}/deactivate', [UserRoleController::class, 'deactivate']);
+    Route::post('/user', [UserRoleController::class, 'store']);
+    Route::get('/user/show/{user}', [UserRoleController::class, 'show']);
+    Route::put('/user/{user}', [UserRoleController::class, 'update']);
+    Route::post('/user/activate/{user}', [UserRoleController::class, 'activate']);
 
     Route::get('permissions', [PermissionController::class, 'index']);
     Route::post('permissions', [PermissionController::class, 'store']);
