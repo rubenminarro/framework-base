@@ -14,10 +14,11 @@ Route::middleware(['auth:sanctum', 'role:Administrador'])->prefix('admin')->grou
     Route::post('/user/activate/{user}', [UserRoleController::class, 'activate']);
 
     Route::get('permissions', [PermissionController::class, 'index']);
-    Route::post('permissions', [PermissionController::class, 'store']);
-    Route::get('permissions/{permission}', [PermissionController::class, 'show']);
-    Route::put('permissions/{permission}', [PermissionController::class, 'update']);
-    Route::delete('permissions/{permission}', [PermissionController::class, 'destroy']);
+    Route::post('permission', [PermissionController::class, 'store']);
+    Route::get('permission/{permission}', [PermissionController::class, 'show']);
+    Route::put('permission/{permission}', [PermissionController::class, 'update']);
+    Route::post('permission/activate/{permission}', [PermissionController::class, 'activate']);
+    Route::delete('permission/{permission}', [PermissionController::class, 'destroy']);
 
     Route::get('/roles', [RoleController::class, 'index']);
     Route::post('/roles', [RoleController::class, 'store']);

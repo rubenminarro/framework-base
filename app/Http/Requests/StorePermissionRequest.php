@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePermissionRequest extends FormRequest
 {
@@ -19,24 +20,39 @@ class StorePermissionRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'name' => strtolower(trim($this->name)),
+        ]);
+    }
+
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:100|unique:permissions,name',
-            'guard_name' => 'required|string|in:web,api'
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[a-z0-9]+\.[a-z0-9]+$/', 
+                Rule::unique('permissions', 'name'),
+            ],
+            'guard_name' => [
+                'required',
+                'string',
+                Rule::in(['web', 'api']),
+            ],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'El campo del Permiso es obligatorio.',
-            'name.string' => 'El campo del Permiso debe ser una cadena de texto.',
-            'name.max' => 'El campo del Permiso no debe tener más de 100 caracteres.',
-            'name.unique' => 'El campo del Permiso debe ser único.',
-            'guard_name.required' => 'El campo Guard es obligatorio.',
-            'guard_name.string' => 'El campo Guard debe ser una cadena de texto.',
-            'guard_name.in' => 'El campo Guard debe ser "web" o "api".',
+            'name.required' => 'El nombre del permiso es obligatorio.',
+            'name.unique'   => 'Este permiso ya existe en el sistema.',
+            'name.regex'    => 'El formato del permiso debe ser "recurso.accion" (ej: citas.ver).',
+            'guard_name.in' => 'El guard seleccionado no es válido (debe ser web o api).',
         ];
     }
 }

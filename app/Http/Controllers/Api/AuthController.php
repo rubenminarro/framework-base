@@ -41,6 +41,12 @@ class AuthController extends Controller
     {
         $request->user()->tokens()->delete();
 
+        auth()->guard('web')->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
         return $this->successResponse('Sesión cerrada correctamente.');
     }
 }

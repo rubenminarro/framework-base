@@ -27,10 +27,13 @@ class UserRoleController extends Controller
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
-                    ;
+                    ->orWhereHas('roles', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
                 });
             })
-            ->paginate(10);
+            ->paginate(10)
+        ;
 
         return $this->successResponse(
             'Usuarios obtenidos correctamente.',
@@ -80,26 +83,22 @@ class UserRoleController extends Controller
 
         $user->syncRoles([$request->role]);
 
-        return $this->successResponse(
-            'Usuario actualizado correctamente.', 
-            new ShowUserResource($user->load('roles'))
-        );
+        return $this->successResponse('Usuario actualizado correctamente.', new ShowUserResource($user->load('roles')));
 
     }
 
     public function activate(User $user)
     {
-        $user->active = !$user->active;
-        $user->save();
+        $user->update(['active' => !$user->active]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Estado del usuario actualizado.',
-            'data' => [
-                'id' => $user->id,
-                'active' => $user->active,
-            ]
-        ]);
+        $data = [
+            'id' => $user->id,
+            'active' => $user->active,
+        ];
+
+        $message = $user->active ? 'Usuario activado correctamente.' : 'Usuario desactivado correctamente.';
+
+        return $this->successResponse($message, $data);
 
     }
 
