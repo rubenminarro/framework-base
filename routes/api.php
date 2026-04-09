@@ -15,7 +15,7 @@ Route::middleware(['auth:sanctum', 'role:Administrador'])->prefix('admin')->grou
 
     Route::get('permissions', [PermissionController::class, 'index']);
     Route::post('permission', [PermissionController::class, 'store']);
-    Route::get('permission/{permission}', [PermissionController::class, 'show']);
+    Route::get('permission/show/{permission}', [PermissionController::class, 'show']);
     Route::put('permission/{permission}', [PermissionController::class, 'update']);
     Route::post('permission/activate/{permission}', [PermissionController::class, 'activate']);
     Route::delete('permission/{permission}', [PermissionController::class, 'destroy']);

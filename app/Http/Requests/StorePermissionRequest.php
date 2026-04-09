@@ -52,7 +52,8 @@ class StorePermissionRequest extends FormRequest
             'name.required' => 'El nombre del permiso es obligatorio.',
             'name.unique'   => 'Este permiso ya existe en el sistema.',
             'name.regex'    => 'El formato del permiso debe ser "recurso.accion" (ej: citas.ver).',
-            'guard_name.in' => 'El guard seleccionado no es válido (debe ser web o api).',
+            'guard_name.required' => 'Entorno de programación es obligatorio.',
+            'guard_name.in' => 'El entorno de programación seleccionado no es válido (debe ser web o api).',
         ];
     }
 }

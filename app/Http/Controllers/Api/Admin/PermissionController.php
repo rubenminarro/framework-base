@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StorePermissionRequest;
 use App\Http\Requests\UpdatePermissionRequest;
 use App\Http\Resources\ShowPermissionResource;
+use App\Http\Resources\PermissionResource;
 use App\Models\Permission;
 use App\Traits\ApiResponse;
 
@@ -23,10 +24,12 @@ class PermissionController extends Controller
         $permissions = Permission::when($search, function ($query, $search) {
             $query->where('name', 'like', "%{$search}%");
         })->orderBy('name')->paginate(10);
+
+        $data = PermissionResource::collection($permissions->items());
     
         return $this->successResponse(
             'Permisos obtenidos correctamente.',
-            $permissions->items(),
+            $data,
             200,
             [
                 'pagination' => [
@@ -68,7 +71,9 @@ class PermissionController extends Controller
     public function destroy(Permission $permission)
     {
         if (!$permission->canBeDeleted()) {
-            return $this->errorResponse('Este permiso está en uso. Desactívalo en lugar de borrarlo.', null, 422);
+
+            return $this->errorResponse('Hubo un error al eliminar el permiso.', ['name' => ['Este permiso está en uso. Desactívalo en lugar de borrarlo.']], 422);
+
         }
 
         $permission->delete();
