@@ -21,10 +21,11 @@ Route::middleware(['auth:sanctum', 'role:Administrador'])->prefix('admin')->grou
     Route::delete('permission/{permission}', [PermissionController::class, 'destroy']);
 
     Route::get('/roles', [RoleController::class, 'index']);
-    Route::post('/roles', [RoleController::class, 'store']);
-    Route::get('/roles/{role}', [RoleController::class, 'show']);
-    Route::put('/roles/{role}', [RoleController::class, 'update']);
-    Route::delete('/roles/{role}', [RoleController::class, 'destroy']);
+    Route::post('/role', [RoleController::class, 'store']);
+    Route::get('/role/show/{role}', [RoleController::class, 'show']);
+    Route::put('/role/{role}', [RoleController::class, 'update']);
+    Route::post('/role/activate/{role}', [RoleController::class, 'activate']);
+    Route::delete('/role/{role}', [RoleController::class, 'destroy']);
     Route::post('/roles/{role}/permissions', [RoleController::class, 'syncPermissions']);
     
 

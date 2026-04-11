@@ -9,6 +9,7 @@ use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use App\Traits\ApiResponse;
 use App\Http\Resources\ShowUserResource;
+use App\Http\Resources\UsersResource;
 
 
 class UserRoleController extends Controller
@@ -35,9 +36,11 @@ class UserRoleController extends Controller
             ->paginate(10)
         ;
 
+        $data = UsersResource::collection($users->items());
+
         return $this->successResponse(
             'Usuarios obtenidos correctamente.',
-            $users->items(),
+            $data,
             200,
             [
                 'pagination' => [
@@ -52,7 +55,7 @@ class UserRoleController extends Controller
 
     public function show(User $user)
     {
-        return $this->successResponse('Usuario encontrado.', new ShowUserResource($user->load('roles')));
+        return $this->successResponse('Usuario encontrado.', new ShowUserResource($user));
     }
 
     public function store(StoreUserRequest $request, User $user)
@@ -64,7 +67,7 @@ class UserRoleController extends Controller
 
         $user->assignRole($request->role);
     
-        return $this->successResponse('Usuario creado correctamente.', new ShowUserResource($user->load('roles')));
+        return $this->successResponse('Usuario creado correctamente.', new ShowUserResource($user));
         
     }
 
@@ -83,7 +86,7 @@ class UserRoleController extends Controller
 
         $user->syncRoles([$request->role]);
 
-        return $this->successResponse('Usuario actualizado correctamente.', new ShowUserResource($user->load('roles')));
+        return $this->successResponse('Usuario actualizado correctamente.', new ShowUserResource($user));
 
     }
 

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StorePermissionRequest;
 use App\Http\Requests\UpdatePermissionRequest;
 use App\Http\Resources\ShowPermissionResource;
-use App\Http\Resources\PermissionResource;
+use App\Http\Resources\PermissionsResource;
 use App\Models\Permission;
 use App\Traits\ApiResponse;
 
@@ -25,7 +25,7 @@ class PermissionController extends Controller
             $query->where('name', 'like', "%{$search}%");
         })->orderBy('name')->paginate(10);
 
-        $data = PermissionResource::collection($permissions->items());
+        $data = PermissionsResource::collection($permissions->items());
     
         return $this->successResponse(
             'Permisos obtenidos correctamente.',
