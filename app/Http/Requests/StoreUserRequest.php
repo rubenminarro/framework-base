@@ -55,10 +55,6 @@ class StoreUserRequest extends FormRequest
                 'required:password', 
                 'same:password'
             ],
-             'role' => [
-                'required', 
-                'exists:roles,name'
-            ],
             'role' => [
                 'required', 
                 'exists:roles,name'

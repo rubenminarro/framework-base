@@ -20,7 +20,7 @@ class ShowRoleResource extends JsonResource
             'description' => $this->description,
             'guard_name' => $this->guard_name,
             'active'=> $this->active,
-            'permissions' => $this->permissions->pluck('id'), 
+            'permissions' => $this->permissions->pluck('id')
         ];
     }
 }

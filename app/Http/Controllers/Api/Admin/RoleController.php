@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
-use App\Http\Requests\SyncPermissionsRequest;
 use App\Http\Resources\RolesResource;
 use App\Http\Resources\ShowRoleResource;
+use App\Http\Resources\ShowRolePermissionsResource;
 use App\Models\Role;
+use App\Models\Permission;
 use App\Traits\ApiResponse;
 
 class RoleController extends Controller
@@ -45,19 +46,39 @@ class RoleController extends Controller
 
     public function store(StoreRoleRequest $request)
     {
-        $role = Role::create($request->validated());
-        return response()->json($role, 201);
+        $data = $request->validated();
+
+        $role = Role::create($data);
+
+        $role->syncPermissions($data['permissions']);
+
+        return $this->successResponse(
+            'Rol creado correctamente.',
+            new ShowRoleResource($role),
+            201
+        );
     }
 
     public function show(Role $role)
     {
-        return $this->successResponse('Rol encontrado.', new  ShowRoleResource($role));
+        return $this->successResponse('Rol encontrado.', new ShowRoleResource($role));
     }
 
     public function update(UpdateRoleRequest $request, Role $role)
     {
-        $role->update($request->validated());
-        return response()->json($role);
+        
+        $data = $request->validated();
+
+        $role->update($data);
+    
+        if (array_key_exists('permissions', $data)) {
+            $role->syncPermissions($data['permissions']);
+        }
+
+        return $this->successResponse(
+            'Rol actualizado correctamente.',
+            new ShowRoleResource($role)
+        );
     }
 
     public function activate(Role $role)
@@ -85,15 +106,24 @@ class RoleController extends Controller
         
         $role->delete();
         
-        return response()->json(['message' => 'Role eliminado correctamente']);
+        return $this->successResponse('Rol eliminado correctamente.');
     }
 
-    public function syncPermissions(SyncPermissionsRequest $request, Role $role)
+    public function permissions()
     {
-        $role->syncPermissions($request->permissions);
-        return response()->json([
-            'message' => 'Permisos sincronizados correctamente',
-            'role' => $role->load('permissions')
-        ]);
+        $permissions = Permission::all()
+        ->groupBy(fn($p) => explode('.', $p->name)[0])
+        ->map(function ($group, $module) {
+            return [
+                'module' => $module,
+                'list'   => $group->map(fn($p) => ['id' => $p->id, 'name' => $p->name])->values()
+            ];
+        })->values();
+
+        return $this->successResponse(
+            'Permisos obtenidos correctamente.',
+            $permissions,
+            200
+        );
     }
 }
