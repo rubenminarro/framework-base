@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\Admin\UserRoleController;
 use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\RoleController;
 
-Route::middleware(['auth:sanctum', 'role:Administrador'])->prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'role:administrador'])->prefix('admin')->group(function () {
     
     Route::get('/users', [UserRoleController::class, 'index']);
     Route::post('/user', [UserRoleController::class, 'store']);

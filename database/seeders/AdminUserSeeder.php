@@ -11,20 +11,22 @@ class AdminUserSeeder extends Seeder
 {
     public function run()
     {
-        // Crear o buscar rol Administrador
-        $adminRole = Role::firstOrCreate(['name' => 'Administrador']);
+        $adminRole = Role::firstOrCreate([
+            'name' => 'administrador',
+            'guard_name' => 'api'
+        ]);
 
-        // Crear o buscar usuario admin
         $admin = User::firstOrCreate(
-            ['email' => 'admin@vet.com.py'],
+            ['email' => 'admin@mail.com.py'],
             [
-                'name' => 'Administrador',
+                'name' => 'administrador',
+                'first_name' => 'Ruben',
+                'last_name' => 'Minarro',
                 'password' => Hash::make(env('ADMIN_PASSWORD'))
             ]
         );
 
-        // Asignar rol (evita duplicados)
-        if (!$admin->hasRole('Administrador')) {
+        if (!$admin->hasRole('administrador')) {
             $admin->assignRole($adminRole);
         }
     }
